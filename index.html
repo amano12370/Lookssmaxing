@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GlowScore™ – Your Science-Backed Beauty Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fdf6ee;
+    --warm: #f5e6d3;
+    --gold: #c9a96e;
+    --deep: #1a1008;
+    --blush: #e8b4a0;
+    --sage: #8aab8e;
+    --text: #2d1f0e;
+    --muted: #7a6555;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── AD SLOTS ── */
+  .ad-banner {
+    width: 100%;
+    max-width: 728px;
+    margin: 0 auto;
+    min-height: 90px;
+    background: linear-gradient(135deg, #e8ddd0, #d5c9bc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #999;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .ad-banner-top { border-bottom: 1px solid #e2d5c5; }
+  .ad-banner-bottom { border-top: 1px solid #e2d5c5; margin-top: 32px; }
+
+  .ad-square {
+    width: 300px;
+    min-height: 250px;
+    background: linear-gradient(135deg, #e8ddd0, #d5c9bc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #999;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 24px auto;
+    border-radius: 8px;
+  }
+
+  /* Replace above divs with your Adsterra ad code when live */
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 48px 24px 32px;
+    position: relative;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, #f0dcc8 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .badge {
+    display: inline-block;
+    background: var(--gold);
+    color: white;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 7vw, 3.2rem);
+    line-height: 1.15;
+    color: var(--deep);
+    margin-bottom: 14px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 340px;
+    margin: 0 auto 32px;
+    line-height: 1.6;
+  }
+
+  .start-btn {
+    background: var(--deep);
+    color: var(--cream);
+    border: none;
+    padding: 16px 36px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    box-shadow: 0 4px 20px rgba(26,16,8,.25);
+  }
+
+  .start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,16,8,.3); }
+
+  /* ── QUIZ CONTAINER ── */
+  .container { max-width: 480px; margin: 0 auto; padding: 0 20px 60px; }
+
+  .quiz-screen { display: none; }
+  .quiz-screen.active { display: block; }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    margin: 20px 0 28px;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: .5px;
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: #e5d9cc;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--blush));
+    border-radius: 2px;
+    transition: width .4s ease;
+  }
+
+  /* ── QUESTION CARD ── */
+  .question-card {
+    background: white;
+    border-radius: 20px;
+    padding: 28px 24px;
+    box-shadow: 0 2px 24px rgba(0,0,0,.07);
+    margin-bottom: 16px;
+    animation: fadeUp .35s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number { font-size: 11px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; font-weight: 500; }
+  .q-text { font-family: 'Playfair Display', serif; font-size: 18px; line-height: 1.45; color: var(--deep); margin-bottom: 22px; }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    background: var(--cream);
+    border: 2px solid #e8ddd0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all .2s;
+    line-height: 1.4;
+  }
+
+  .option-btn:hover, .option-btn.selected {
+    border-color: var(--gold);
+    background: #fdf3e8;
+  }
+
+  .option-btn.selected { font-weight: 500; }
+
+  .nav-btns { display: flex; gap: 10px; margin-top: 16px; }
+
+  .btn-back {
+    flex: 0 0 auto;
+    background: transparent;
+    border: 2px solid #e0d0c0;
+    border-radius: 50px;
+    padding: 14px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: .2s;
+  }
+
+  .btn-back:hover { border-color: var(--gold); color: var(--gold); }
+
+  .btn-next {
+    flex: 1;
+    background: var(--deep);
+    border: none;
+    border-radius: 50px;
+    padding: 14px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    transition: .2s;
+    opacity: .4;
+    pointer-events: none;
+  }
+
+  .btn-next.ready { opacity: 1; pointer-events: all; }
+  .btn-next.ready:hover { background: #3d2a16; }
+
+  /* ── RESULT SCREEN ── */
+  #result-screen {
+    display: none;
+    animation: fadeUp .4s ease;
+  }
+
+  #result-screen.active { display: block; }
+
+  .result-header {
+    text-align: center;
+    padding: 36px 0 24px;
+  }
+
+  .score-ring {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(var(--gold) var(--pct, 0%), #e8ddd0 0%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    position: relative;
+  }
+
+  .score-ring::before {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    background: white;
+    border-radius: 50%;
+  }
+
+  .score-num {
+    position: relative;
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--deep);
+    z-index: 1;
+  }
+
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--deep);
+    margin-bottom: 6px;
+  }
+
+  .result-tagline { font-size: 14px; color: var(--muted); }
+
+  .result-section {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 2px 20px rgba(0,0,0,.06);
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  .rec-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0e8de;
+  }
+
+  .rec-item:last-child { border-bottom: none; }
+
+  .rec-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .rec-icon.gold-bg { background: #fdf3e8; }
+  .rec-icon.sage-bg { background: #edf4ee; }
+  .rec-icon.blush-bg { background: #fceee9; }
+
+  .rec-text h4 { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .rec-text p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* ── EMAIL CAPTURE ── */
+  .email-section {
+    background: linear-gradient(135deg, var(--deep) 0%, #3d2a16 100%);
+    border-radius: 20px;
+    padding: 28px 24px;
+    color: white;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  .email-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .email-section p {
+    font-size: 13px;
+    opacity: .75;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .email-form { display: flex; flex-direction: column; gap: 10px; }
+
+  .email-input {
+    padding: 14px 18px;
+    border-radius: 50px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    width: 100%;
+    background: rgba(255,255,255,.12);
+    color: white;
+    border: 1px solid rgba(255,255,255,.2);
+  }
+
+  .email-input::placeholder { color: rgba(255,255,255,.5); }
+
+  .email-btn {
+    background: var(--gold);
+    border: none;
+    border-radius: 50px;
+    padding: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    transition: .2s;
+  }
+
+  .email-btn:hover { background: #b8914f; }
+
+  .email-success {
+    display: none;
+    text-align: center;
+    padding: 10px;
+    background: rgba(138,171,142,.2);
+    border-radius: 12px;
+    color: #a8dab0;
+    font-size: 14px;
+  }
+
+  .restart-btn {
+    display: block;
+    text-align: center;
+    background: transparent;
+    border: 2px solid #e0d0c0;
+    border-radius: 50px;
+    padding: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    transition: .2s;
+  }
+
+  .restart-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── LANDING ── */
+  #landing { display: block; }
+  #quiz-wrapper { display: none; }
+
+  .features {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .feature-pill {
+    background: white;
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP AD BANNER — Replace with Adsterra code -->
+<div class="ad-banner ad-banner-top">Advertisement</div>
+
+<!-- ══════════ LANDING ══════════ -->
+<div id="landing">
+  <div class="hero">
+    <span class="badge">✦ Science-Backed</span>
+    <h1>Discover Your<br><em>Glow Score™</em></h1>
+    <p class="subtitle">Answer 10 questions about your appearance & lifestyle. Get a personalized science-based beauty protocol — free.</p>
+    <button class="start-btn" onclick="startQuiz()">Begin My Analysis →</button>
+    <div class="features">
+      <span class="feature-pill">🔬 Dermatology-based</span>
+      <span class="feature-pill">⚡ 2-minute quiz</span>
+      <span class="feature-pill">🎯 Personalized results</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ QUIZ ══════════ -->
+<div id="quiz-wrapper">
+  <div class="container">
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="q-counter">Question 1 of 10</span>
+        <span id="q-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <div id="question-area"></div>
+
+  </div>
+</div>
+
+<!-- ══════════ RESULT ══════════ -->
+<div id="result-screen" class="container">
+
+  <div class="result-header">
+    <div class="score-ring" id="score-ring">
+      <span class="score-num" id="score-display">—</span>
+    </div>
+    <h2 class="result-title" id="result-title">Calculating…</h2>
+    <p class="result-tagline" id="result-tagline"></p>
+  </div>
+
+  <!-- MID AD -->
+  <div class="ad-square">Advertisement</div>
+
+  <div id="recommendations"></div>
+
+  <!-- EMAIL CAPTURE -->
+  <div class="email-section">
+    <h3>Get Your Full Protocol PDF</h3>
+    <p>We'll email you a detailed 30-day glow routine based on your score — personalized & science-cited.</p>
+    <div class="email-form">
+      <input type="email" class="email-input" id="email-input" placeholder="your@email.com">
+      <button class="email-btn" onclick="submitEmail()">Send My Protocol →</button>
+      <div class="email-success" id="email-success">✓ Check your inbox! Your protocol is on the way.</div>
+    </div>
+  </div>
+
+  <button class="restart-btn" onclick="restartQuiz()">↩ Retake the Quiz</button>
+
+</div>
+
+<!-- BOTTOM AD -->
+<div class="ad-banner ad-banner-bottom">Advertisement</div>
+
+
+<script>
+const questions = [
+  {
+    q: "How would you describe your skin type?",
+    options: [
+      { text: "Oily — shiny throughout the day", scores: { skin: 1, hydration: 2 } },
+      { text: "Dry — feels tight or flaky", scores: { skin: 1, hydration: 0 } },
+      { text: "Combination — oily T-zone, dry cheeks", scores: { skin: 2, hydration: 1 } },
+      { text: "Balanced / Normal — rarely problematic", scores: { skin: 3, hydration: 3 } },
+    ]
+  },
+  {
+    q: "How often do you experience breakouts or blemishes?",
+    options: [
+      { text: "Constantly — multiple active breakouts", scores: { skin: 0 } },
+      { text: "Regularly — at least weekly", scores: { skin: 1 } },
+      { text: "Occasionally — hormonal or stress-related", scores: { skin: 2 } },
+      { text: "Rarely or never", scores: { skin: 3 } },
+    ]
+  },
+  {
+    q: "How many glasses of water do you drink daily?",
+    options: [
+      { text: "Less than 4 glasses", scores: { hydration: 0 } },
+      { text: "4–6 glasses", scores: { hydration: 1 } },
+      { text: "6–8 glasses", scores: { hydration: 2 } },
+      { text: "8+ glasses", scores: { hydration: 3 } },
+    ]
+  },
+  {
+    q: "What does your current skincare routine look like?",
+    options: [
+      { text: "I don't really have one", scores: { routine: 0 } },
+      { text: "Just cleanser + moisturizer", scores: { routine: 1 } },
+      { text: "Cleanser, toner, moisturizer & SPF", scores: { routine: 2 } },
+      { text: "Full AM/PM routine with serums & actives", scores: { routine: 3 } },
+    ]
+  },
+  {
+    q: "How much sun exposure do you get daily (without SPF)?",
+    options: [
+      { text: "I'm outdoors 2+ hours unprotected", scores: { aging: 0 } },
+      { text: "Some, but I forget SPF often", scores: { aging: 1 } },
+      { text: "Minimal — I apply SPF daily", scores: { aging: 2 } },
+      { text: "I'm very diligent about UV protection", scores: { aging: 3 } },
+    ]
+  },
+  {
+    q: "How would you describe your hair condition?",
+    options: [
+      { text: "Dry, brittle, or heavily damaged", scores: { hair: 0 } },
+      { text: "Frizzy or dull — needs work", scores: { hair: 1 } },
+      { text: "Pretty healthy with minor issues", scores: { hair: 2 } },
+      { text: "Shiny, strong, and healthy", scores: { hair: 3 } },
+    ]
+  },
+  {
+    q: "How many hours of sleep do you typically get?",
+    options: [
+      { text: "Under 5 hours", scores: { sleep: 0 } },
+      { text: "5–6 hours", scores: { sleep: 1 } },
+      { text: "7 hours", scores: { sleep: 2 } },
+      { text: "7–9 hours (optimal range)", scores: { sleep: 3 } },
+    ]
+  },
+  {
+    q: "How would you rate your diet quality?",
+    options: [
+      { text: "Lots of processed food, few vegetables", scores: { nutrition: 0 } },
+      { text: "Inconsistent — healthy sometimes", scores: { nutrition: 1 } },
+      { text: "Mostly balanced with some indulgences", scores: { nutrition: 2 } },
+      { text: "Rich in whole foods, antioxidants & healthy fats", scores: { nutrition: 3 } },
+    ]
+  },
+  {
+    q: "How do you manage stress in your life?",
+    options: [
+      { text: "High stress, rarely unwind", scores: { stress: 0 } },
+      { text: "Moderate stress with occasional relief", scores: { stress: 1 } },
+      { text: "I have some stress-relief practices", scores: { stress: 2 } },
+      { text: "Good stress management — exercise, meditation, etc.", scores: { stress: 3 } },
+    ]
+  },
+  {
+    q: "How would others likely describe your overall appearance?",
+    options: [
+      { text: "I often feel dull or tired-looking", scores: { confidence: 0 } },
+      { text: "Average — nothing stands out", scores: { confidence: 1 } },
+      { text: "Naturally attractive with some concerns", scores: { confidence: 2 } },
+      { text: "Vibrant and well-put-together", scores: { confidence: 3 } },
+    ]
+  },
+];
+
+const profiles = [
+  {
+    min: 0, max: 9,
+    title: "The Glow Awakening Phase",
+    tagline: "You're at the start of your transformation — the potential is huge.",
+    recs: [
+      { icon: "💧", bg: "blush-bg", title: "Hydration Reset", desc: "Science shows skin barrier function improves within 72 hours of increasing water intake to 2L/day. Start there." },
+      { icon: "🌙", bg: "gold-bg", title: "Sleep-Skin Connection", desc: "During deep sleep, HGH triggers cellular repair. Aim for 7–8 hrs — studies link chronic sleep deprivation to 30% more wrinkles." },
+      { icon: "🥗", bg: "sage-bg", title: "Anti-inflammatory Diet", desc: "Eliminate added sugar for 2 weeks. High glycemic foods spike androgens causing acne — this is well-documented in clinical literature." },
+      { icon: "🧴", bg: "blush-bg", title: "Barrier-First Skincare", desc: "Build a simple routine: gentle cleanser → ceramide moisturizer → SPF 30+. Consistency beats complexity every time." },
+    ]
+  },
+  {
+    min: 10, max: 19,
+    title: "The Emerging Glow",
+    tagline: "Solid foundation — targeted upgrades will unlock your next level.",
+    recs: [
+      { icon: "🔆", bg: "gold-bg", title: "Introduce Vitamin C Serum", desc: "L-ascorbic acid (10–20%) stimulates collagen synthesis & neutralizes UV-induced free radicals. Apply every AM under SPF." },
+      { icon: "💤", bg: "sage-bg", title: "Optimize Your Sleep Environment", desc: "A cooler room (65–68°F) increases deep sleep cycles. Silk pillowcase reduces overnight facial friction and moisture loss." },
+      { icon: "🧬", bg: "blush-bg", title: "Add Retinol (0.025%)", desc: "Retinoids are the most evidence-backed anti-aging ingredient. Start with low concentration 2x/week to build tolerance." },
+      { icon: "🏃", bg: "gold-bg", title: "Exercise for Skin Youth", desc: "Studies show regular cardio reverses skin aging at a cellular level — mitochondria in skin cells show markers of younger tissue after 3 months." },
+    ]
+  },
+  {
+    min: 20, max: 24,
+    title: "The Active Glow",
+    tagline: "You're doing well — refine and maintain to reach your peak.",
+    recs: [
+      { icon: "🫧", bg: "sage-bg", title: "Add Weekly Exfoliation", desc: "AHAs (glycolic or lactic acid) at 5–10% speed cell turnover proven to reduce dark spots and improve texture significantly." },
+      { icon: "🌿", bg: "blush-bg", title: "Targeted Antioxidants", desc: "Niacinamide (5%) reduces pore appearance & hyperpigmentation. Combine with zinc for sebum control — all clinically tested." },
+      { icon: "💆", bg: "gold-bg", title: "Facial Lymphatic Drainage", desc: "Gua sha or gentle massage 3x/week improves microcirculation, reduces puffiness, and accelerates product absorption." },
+      { icon: "🎯", bg: "sage-bg", title: "Gut-Skin Axis", desc: "A 2023 meta-analysis found probiotics (specifically L. rhamnosus) significantly improve acne and skin hydration markers in 8 weeks." },
+    ]
+  },
+  {
+    min: 25, max: 30,
+    title: "The Peak Glow™",
+    tagline: "You're thriving — this is how to protect and amplify your natural radiance.",
+    recs: [
+      { icon: "✨", bg: "gold-bg", title: "Protect Your Collagen", desc: "At peak glow, preservation matters. Peptide serums (Matrixyl 3000) have been shown in RCTs to reduce wrinkle depth by 33% in 12 weeks." },
+      { icon: "🫀", bg: "sage-bg", title: "Longevity Nutrition", desc: "Omega-3s (2g/day EPA+DHA) maintain skin lipid barrier and have anti-inflammatory effects that slow photoaging." },
+      { icon: "🔬", bg: "blush-bg", title: "Advanced Monitoring", desc: "Consider annual skin analysis with a dermatologist to catch early signs of damage. Your baseline is excellent — protect it." },
+      { icon: "🧘", bg: "gold-bg", title: "Stress Hormones & Skin", desc: "Cortisol degrades collagen and triggers breakouts. Regular mindfulness practice measurably lowers cortisol (NIH-confirmed)." },
+    ]
+  },
+];
+
+let current = 0;
+let answers = [];
+
+function startQuiz() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('quiz-wrapper').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const total = questions.length;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('q-counter').textContent = `Question ${current + 1} of ${total}`;
+  document.getElementById('q-pct').textContent = `${pct}%`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const q = questions[current];
+  const selected = answers[current] !== undefined ? answers[current] : -1;
+
+  const html = `
+    <div class="question-card">
+      <div class="q-number">Question ${current + 1}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">
+        ${q.options.map((o, i) => `
+          <button class="option-btn ${selected === i ? 'selected' : ''}" onclick="selectOption(${i})">
+            ${o.text}
+          </button>`).join('')}
+      </div>
+    </div>
+    <div class="nav-btns">
+      ${current > 0 ? `<button class="btn-back" onclick="goBack()">← Back</button>` : ''}
+      <button class="btn-next ${selected !== -1 ? 'ready' : ''}" id="btn-next" onclick="goNext()">
+        ${current === questions.length - 1 ? 'See My Results ✦' : 'Next Question →'}
+      </button>
+    </div>
+  `;
+
+  document.getElementById('question-area').innerHTML = html;
+}
+
+function selectOption(i) {
+  answers[current] = i;
+  document.querySelectorAll('.option-btn').forEach((b, idx) => {
+    b.classList.toggle('selected', idx === i);
+  });
+  document.getElementById('btn-next').classList.add('ready');
+}
+
+function goNext() {
+  if (answers[current] === undefined) return;
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function goBack() {
+  if (current > 0) { current--; renderQuestion(); }
+}
+
+function calcScore() {
+  let total = 0;
+  answers.forEach((ansIdx, qIdx) => {
+    const scoreObj = questions[qIdx].options[ansIdx].scores;
+    total += Object.values(scoreObj).reduce((a, b) => a + b, 0);
+  });
+  // Normalize to 0–100
+  const max = questions.length * 3;
+  return Math.round((total / max) * 100);
+}
+
+function showResults() {
+  document.getElementById('quiz-wrapper').style.display = 'none';
+  const screen = document.getElementById('result-screen');
+  screen.style.display = 'block';
+
+  const score = calcScore();
+  const rawScore = answers.reduce((sum, ansIdx, qIdx) => {
+    const s = questions[qIdx].options[ansIdx].scores;
+    return sum + Object.values(s).reduce((a, b) => a + b, 0);
+  }, 0);
+
+  const profile = profiles.find(p => rawScore >= p.min && rawScore <= p.max) || profiles[3];
+
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('score-ring').style.setProperty('--pct', score + '%');
+  document.getElementById('result-title').textContent = profile.title;
+  document.getElementById('result-tagline').textContent = profile.tagline;
+
+  const recsHTML = `
+    <div class="result-section">
+      <div class="section-title">Your Personalized Science Protocol</div>
+      ${profile.recs.map(r => `
+        <div class="rec-item">
+          <div class="rec-icon ${r.bg}">${r.icon}</div>
+          <div class="rec-text">
+            <h4>${r.title}</h4>
+            <p>${r.desc}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  document.getElementById('recommendations').innerHTML = recsHTML;
+
+  // animate score ring
+  let displayPct = 0;
+  const target = score;
+  const interval = setInterval(() => {
+    displayPct = Math.min(displayPct + 2, target);
+    document.getElementById('score-ring').style.setProperty('--pct', displayPct + '%');
+    if (displayPct >= target) clearInterval(interval);
+  }, 20);
+}
+
+function submitEmail() {
+  const input = document.getElementById('email-input');
+  const email = input.value.trim();
+  if (!email || !email.includes('@')) {
+    input.style.borderColor = '#e8b4a0';
+    input.placeholder = 'Please enter a valid email';
+    return;
+  }
+
+  // ── INTEGRATE YOUR EMAIL SERVICE HERE ──
+  // e.g. Mailchimp, ConvertKit, EmailOctopus
+  // fetch('https://your-endpoint.com/subscribe', { method:'POST', body: JSON.stringify({email}) })
+
+  document.getElementById('email-success').style.display = 'block';
+  input.style.display = 'none';
+  document.querySelector('.email-btn').style.display = 'none';
+
+  // Optional: fire a conversion event for ad tracking
+  // gtag('event', 'lead', { event_category: 'email' });
+}
+
+function restartQuiz() {
+  current = 0;
+  answers = [];
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('landing').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+</script>
+
+</body>
+</html>
